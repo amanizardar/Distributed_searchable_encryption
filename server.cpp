@@ -8,6 +8,7 @@
 #include <cstdlib> 
 #include <thread>
 #include <cstring>
+#include "generator.cpp"
 
 using namespace std;
 
@@ -186,6 +187,8 @@ int main()
 
 		// function call to sha 512 encryption.
 
+		string hash512 =  sha512(p.second.first);
+
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +223,7 @@ int main()
 		// Send to client 2
 
 
-		string encrypted_word = p.first;
+		string encrypted_word = hash512;
         char* data = const_cast<char*>(encrypted_word.c_str());
         send(client_socket2, data, strlen(data), 0);
 

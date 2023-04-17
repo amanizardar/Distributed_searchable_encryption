@@ -26,6 +26,23 @@ string sha512(const string str){
     return ss.str();
 }
 
+// std::string sha512(std::string str) {
+//     SHA512_CTX sha512;
+//     unsigned char hash[SHA512_DIGEST_LENGTH];
+
+//     SHA512_Init(&sha512);
+//     SHA512_Update(&sha512, str.c_str(), str.size());
+//     SHA512_Final(hash, &sha512);
+
+//     // Convert the hash to a hexadecimal string
+//     std::stringstream ss;
+//     for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+//         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
+//     }
+
+//     return ss.str();
+// }
+
 // int main() {
 //     // ifstream f1;
 //     // ofstream f2;

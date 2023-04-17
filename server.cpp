@@ -174,45 +174,45 @@ int main()
 
     	// thread t1(run_my_program);
 		pthread_t t1;
-		pthread_create(&t1, NULL, run_my_program, NULL);
+		// pthread_create(&t1, NULL, run_my_program, NULL);
 		
 
 
-		std::cout << "Listening for incoming connections..." << std::endl;
-		sockaddr_in client_addr;
-		socklen_t client_addr_len = sizeof(client_addr);
+		// std::cout << "Listening for incoming connections..." << std::endl;
+		// sockaddr_in client_addr;
+		// socklen_t client_addr_len = sizeof(client_addr);
 		
-			// Accept incoming connections
-		int client_socket2 = accept(server_fd, (sockaddr*)&client_addr, &client_addr_len);
-		if (client_socket2 < 0) {
-			std::cerr << "Error: Failed to accept incoming connection." << std::endl;
-			continue;
-		}
-		// std::cout << "Accepted incoming connection from " << inet_ntoa(client_addr.sin_addr) << std::endl;
+		// 	// Accept incoming connections
+		// int client_socket2 = accept(server_fd, (sockaddr*)&client_addr, &client_addr_len);
+		// if (client_socket2 < 0) {
+		// 	std::cerr << "Error: Failed to accept incoming connection." << std::endl;
+		// 	continue;
+		// }
+		// // std::cout << "Accepted incoming connection from " << inet_ntoa(client_addr.sin_addr) << std::endl;
 		
-		// Send a message to the client
+		// // Send a message to the client
 
-		string encrypted_word = hash512;
-		char* data = const_cast<char*>(encrypted_word.c_str());
-		send(client_socket2, data, strlen(data), 0);
+		// string encrypted_word = hash512;
+		// char* data = const_cast<char*>(encrypted_word.c_str());
+		// send(client_socket2, data, strlen(data), 0);
 
 		
 		
-		// Receive a message from the client
-		char buffer[1024] = {0};
-		int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);
-		if (num_bytes < 0) {
-			std::cerr << "Error: Failed to receive message from client." << std::endl;
-		} else {
-			std::cout << "Received message from client: " << buffer << std::endl;
-		}
+		// // Receive a message from the client
+		// char buffer[1024] = {0};
+		// int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);
+		// if (num_bytes < 0) {
+		// 	std::cerr << "Error: Failed to receive message from client." << std::endl;
+		// } else {
+		// 	std::cout << "Received message from client: " << buffer << std::endl;
+		// }
 		
-		// Close the client socket
-		close(client_socket2);
+		// // Close the client socket
+		// close(client_socket2);
 		
 
 
-		pthread_join(t1, NULL);
+		// pthread_join(t1, NULL);
     	
 		
 

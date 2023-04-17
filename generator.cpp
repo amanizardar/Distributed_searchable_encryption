@@ -32,7 +32,7 @@ int main() {
     string input_word,word;
 
     f1.open("eng_words.txt");
-    f2.open("db.txt");
+    f2.open("hash.txt");
 
     if(f1.is_open() and f2){
         while(f1){

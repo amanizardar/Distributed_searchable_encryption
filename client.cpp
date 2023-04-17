@@ -1,11 +1,9 @@
-
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
-
 
 using namespace std;
 
@@ -46,15 +44,26 @@ int main(int argc, char const* argv[])
 
     while(true){
 
-        string word;
-        printf("Enter the word you want to search :  ");
-        cin >> word;
-        string number_of_nodes;
-        printf("Enter the number ofnodes you want to do the search :  ");
-        cin >> number_of_nodes;
+        string word="",option="2";
+        string number_of_nodes="0",res="";
 
-        word+= "_";
-        word+= number_of_nodes;
+        printf("Enter the word:  ");
+        cin >> word;
+        printf("Enter option 1 to store or 2 to search :  ");
+        cin>>option;
+
+        
+        word=option+"_"+word;
+
+        if(option=="2"){
+            printf("Enter the number of nodes you want to do the search on :  ");
+            cin >> number_of_nodes;
+            
+        }
+
+        word+="_"+number_of_nodes;
+
+        cout<<word<<endl;
 
         char* data = const_cast<char*>(word.c_str());
         send(client_fd, data, strlen(data), 0);
@@ -63,7 +72,6 @@ int main(int argc, char const* argv[])
 
         valread = read(client_fd, buffer, 1024);
 	    printf("%s\n", buffer);
-
 
         printf("Press y to search more words. Press q to quit : ");
         char ch;

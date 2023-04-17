@@ -49,6 +49,13 @@ int main(int argc, char const* argv[])
 
         printf("Enter the word:  ");
         cin >> word;
+	    
+	while(word.length()==0){
+		cout<<"Invalid. Try again.\n";	
+		printf("Enter the word:  ");
+        	cin >> word;
+	}
+	    
         printf("Enter option 1 to store or 2 to search :  ");
         cin>>option;
 

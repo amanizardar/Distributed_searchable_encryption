@@ -14,12 +14,20 @@ using namespace std;
 #define PORT 8080
 
 
-pair<string, int> split(string str){
-
+pair<string, pair<string,int>> split(string str){ 
+	
+	string option;
 	string word;
 	string num;
 	int number_of_nodes;
 	int i = 0;
+
+	while(str[i] != '_'){
+		option += str[i];
+		i++;
+	}
+	i++;
+
 	while(str[i] != '_'){
 		word += str[i];
 		i++;
@@ -33,7 +41,7 @@ pair<string, int> split(string str){
 
 	number_of_nodes = stoi(num);
 
-	pair<string, int> p = make_pair(word, number_of_nodes);
+	pair<string, pair<string,int>> p = make_pair(option, make_pair(word,number_of_nodes));
 	
 	return p;
 
@@ -168,10 +176,11 @@ int main()
 
 		// splitting the word and number of nodes
 
-		pair<string, int> p = split(buffer);
+		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
 
-		cout << "the word is :  "  << p.first << endl;
-		cout << " the num is  : " << p.second << endl;
+		cout << "the option is :  "  << p.first << endl;
+		cout << "the word is :  "  << p.second.first << endl;
+		cout << " the num is  : " << p.second.second << endl;
 
 
 
@@ -229,10 +238,7 @@ int main()
         std::cout << "Client 2: " << buffer << std::endl;
 
 		close(client_socket2);
-		if (run_status != 0) {
-			std::cerr << "Error: Execution failed." << std::endl;
-			return 1;
-		}
+		
 		std::cout << "Program executed successfully." << std::endl;
 
 		/////////////////////////////////////////////////////////////////////////////////////

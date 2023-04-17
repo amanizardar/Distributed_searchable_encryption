@@ -8,18 +8,27 @@
 #include <cstdlib> 
 #include <pthread.h>
 #include <cstring>
+#include "generator.cpp"
 
 using namespace std;
 
 #define PORT 8080
 
 
-pair<string, int> split(string str){
-
+pair<string, pair<string,int>> split(string str){ 
+	
+	string option;
 	string word;
 	string num;
 	int number_of_nodes;
 	int i = 0;
+
+	while(str[i] != '_'){
+		option += str[i];
+		i++;
+	}
+	i++;
+
 	while(str[i] != '_'){
 		word += str[i];
 		i++;
@@ -33,7 +42,7 @@ pair<string, int> split(string str){
 
 	number_of_nodes = stoi(num);
 
-	pair<string, int> p = make_pair(word, number_of_nodes);
+	pair<string, pair<string,int>> p = make_pair(option, make_pair(word,number_of_nodes));
 	
 	return p;
 
@@ -140,14 +149,17 @@ int main()
 
 		// splitting the word and number of nodes
 
-		pair<string, int> p = split(buffer);
+		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
 
-		cout << "the word is :  "  << p.first << endl;
-		cout << " the num is  : " << p.second << endl;
+		cout << "the option is :  "  << p.first << endl;
+		cout << "the word is :  "  << p.second.first << endl;
+		cout << " the num is  : " << p.second.second << endl;
 
 
 
 		// function call to sha 512 encryption.
+
+		string hash512 =  sha512(p.second.first);
 
 
 
@@ -180,7 +192,7 @@ int main()
 		
 		// Send a message to the client
 
-		string encrypted_word = p.first;
+		string encrypted_word = hash512;
 		char* data = const_cast<char*>(encrypted_word.c_str());
 		send(client_socket2, data, strlen(data), 0);
 

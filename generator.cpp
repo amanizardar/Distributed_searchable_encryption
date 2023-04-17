@@ -26,32 +26,49 @@ string sha512(const string str){
     return ss.str();
 }
 
-int main() {
-    ifstream f1;
-    ofstream f2;
-    string input_word,word;
+// std::string sha512(std::string str) {
+//     SHA512_CTX sha512;
+//     unsigned char hash[SHA512_DIGEST_LENGTH];
 
-    f1.open("eng_words.txt");
-    f2.open("hash.txt");
+//     SHA512_Init(&sha512);
+//     SHA512_Update(&sha512, str.c_str(), str.size());
+//     SHA512_Final(hash, &sha512);
 
-    if(f1.is_open() and f2){
-        while(f1){
-            getline(f1,input_word);
-            if(input_word.length()){
-            word = sha512(input_word);
-            cout<<input_word<<":"<<word<<endl;
-            f2<<word<<"\n";
-            }
-        }
-    }else{
-        cout<<"Error in populating db.";
-    }
+//     // Convert the hash to a hexadecimal string
+//     std::stringstream ss;
+//     for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+//         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
+//     }
 
-    f1.close();
-    f2.close();
-    // string input_word = "Terminal Root";
-    // string word = sha512(input_word);
-    // cout<<word<< '\n';
-    // cout<<"Length:"<<word.length()<<endl;
-    return 0;
-}
+//     return ss.str();
+// }
+
+// int main() {
+//     // ifstream f1;
+//     // ofstream f2;
+//     // string input_word,word;
+
+//     // f1.open("eng_words.txt");
+//     // f2.open("hash.txt");
+
+//     // if(f1.is_open() and f2){
+//     //     while(f1){
+//     //         getline(f1,input_word);
+//     //         if(input_word.length()){
+//     //         word = sha512(input_word);
+//     //         cout<<input_word<<":"<<word<<endl;
+//     //         f2<<word<<"\n";
+//     //         }
+//     //     }
+//     // }else{
+//     //     cout<<"Error in populating db.";
+//     // }
+
+//     // f1.close();
+//     // f2.close();
+//     string input_word = "Terminal Root";
+//     string word = sha512(input_word);
+//     cout<<word<< '\n';
+//     cout<<"Length:"<<word.length()<<endl;
+//     return 0;
+// }

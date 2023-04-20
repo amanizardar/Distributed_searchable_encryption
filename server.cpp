@@ -8,7 +8,6 @@
 #include <cstdlib> 
 #include <pthread.h>
 #include <cstring>
-#include "generator.cpp"
 
 
 // Color codes
@@ -79,7 +78,8 @@ pair<string, pair<string,int>> split(string str){
 
 
 
-void* run_my_program(void *vargp) {
+void* run_my_program(void *vargp) 
+{
 	int *processespoint = (int *)vargp;
     int processes = *processespoint;
 
@@ -184,33 +184,26 @@ cout<<"                             Server Starting...\n\n";
 	
 
 
-    while (true) {
+    while (true) 
+	{
         // Receive from client.cpp
 
 
         memset(buffer, 0, sizeof(buffer));
 
         if (recv(client_socket1, buffer, sizeof(buffer), 0) <= 0) {
-            std::cout << "==> Client disconnected." << std::endl;
+            	cout << "==> Unable to recieve data from the Client." << endl;
             break;
         }
-        // std::cout << "The word along with n.of nodes given by the Client 1: " << buffer << std::endl;
-
-		// splitting the word and number of nodes
 
 		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
 
-		// cout << "The option is : "  << p.first << endl;
-		// cout << "The word is :  "  << p.second.first << endl;
-		// cout << "The num is  : " << p.second.second << endl;
-		int nop = p.second.second;
-
-
-		
-
+		string option = p.first;
+		string encrypted_word =  p.second.first;
+		int no_of_processes = p.second.second;
 
 		pthread_t t1;
-		pthread_create(&t1, NULL, run_my_program, &nop);
+		pthread_create(&t1, NULL, run_my_program, &no_of_processes);
 		
 
 
@@ -224,48 +217,38 @@ cout<<"                             Server Starting...\n\n";
 			std::cerr << "Error: Failed to accept incoming connection." << std::endl;
 			continue;
 		}
-		// std::cout << "Accepted incoming connection from " << inet_ntoa(client_addr.sin_addr) << std::endl;
-		
-		// Send a message to the client
-		// function call to sha 512 encryption.
 
-		string encrypted_word =  sha512(p.second.first);
 
 		char charArray[129];
-        strcpy(charArray, encrypted_word.c_str());
-        // cout<<charArray;
-        
+        strcpy(charArray, encrypted_word.c_str());  
         send(client_socket2, charArray, sizeof(charArray), 0);
 
 		
-		// char* data = const_cast<char*>(encrypted_word.c_str());
-		// send(client_socket2, data, strlen(data), 0);
-
-		
-		
 		// Receive a message from the Compute
 		char buffer[1024] = {0};
-		int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);
+		int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);  // Buffer will get Either Yes or NO.
 		if (num_bytes < 0) {
-			std::cerr << "Error: Failed to receive message from Compute." << std::endl;
+			cerr << "Error: Failed to receive message from Compute." << endl;
 		} else {
-			std::cout << "==> Received message from Compute: " << buffer << std::endl;
+			cout << "==> Received message from Compute: " << buffer << endl;
 		}
 
 
+
+		pthread_join(t1, NULL);
 
 		
 		// Close the client socket
 		close(client_socket2);
 
-		if(p.first=="1")
+		if(option=="1")
 		{
 			string res(buffer);
-			if(res=="NO")
+			if(res=="NO")   //means Word is not present in DB, So we need to store it.
 			{
-				int res = STORE_IN_DB(encrypted_word);
+				int res_of_storing = STORE_IN_DB(encrypted_word);
 
-				if(res==-1)
+				if(res_of_storing==-1) 
 				{
 					string temp = "The Updation in the DB is not possible due to an error";
 					char tempbuff[1024];
@@ -280,32 +263,23 @@ cout<<"                             Server Starting...\n\n";
 					send(client_socket1, tempbuff, sizeof(tempbuff), 0);
 				}
 			}
-			else
+			else  //Means Word is already there in the DB. (Means Sending Yes to the Client)
 			{
 				send(client_socket1, buffer, sizeof(buffer), 0);
 			}
 		}
 		
-
-
-		pthread_join(t1, NULL);
-    	
-		
-
-		// Send to client 1
-		if(p.first!="1")
+	
+		if(option=="2")  // Searching result will be sent to the client.
         send(client_socket1, buffer, sizeof(buffer), 0);
-
-		
-
+	
     }
     
     // Close sockets
     close(client_socket1);
     
     close(server_fd);
-    
-	
+
 	// closing the listening socket
 	shutdown(server_fd, SHUT_RDWR);
 	return 0;

@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <bits/stdc++.h>
+#include "generator.cpp"
 
 // Color codes
 const std::string red("\033[0;31m");
@@ -88,51 +89,48 @@ cout<<"                             Client Starting...\n\n";
 
         string word="",option="2";
         string number_of_nodes="0",res="";
+		string encrypted_word ="";
+		string data_to_send="";
+
 		// cout<<"###########################################################"<<endl;
 
 		cout<<cyan<<"==> Enter the word:  "<<reset;
         cin >> word;
 		cout<<cyan;
-	    
-	while(word.length()==0){
-		cout<<red<<"Invalid. Try again.\n";	
-		cout<<cyan<<"==> Enter the word:  "<<reset;
-        cin >> word;
-		cout<<cyan;
 
-	}
+		encrypted_word =  sha512(word);
+
+	    
+		while(word.length()==0){
+			cout<<red<<"Invalid. Try again.\n";	
+			cout<<cyan<<"==> Enter the word:  "<<reset;
+			cin >> word;
+			cout<<cyan;
+			encrypted_word =  sha512(word);
+		}
 	    
         // printf("==> Press 1 to store or 2 to search :  ");
 		cout<<"==> Press 1 to store or 2 to search :  "<<reset;
         cin>>option;
 		cout<<cyan;
-
-
         
-        word=option+"_"+word;
+        data_to_send=option+"_"+encrypted_word;
 
-		// printf("==> Enter the number of nodes you want :  ");
+
 		cout<<"==> Enter the number of nodes you want :  "<<reset;
 		cin >> number_of_nodes;
 		cout<<cyan;
 
-            
+        data_to_send+="_"+number_of_nodes;
 
-        word+="_"+number_of_nodes;
 
-        // cout<<word<<endl;
-
-        char* data = const_cast<char*>(word.c_str());
+        char* data = const_cast<char*>(data_to_send.c_str());
         send(client_fd, data, strlen(data), 0);
 
-        // printf("$: Sent info to the server\n");
-		cout<<green<<"$: Sent info to the server\n";
+		cout<<green<<"$: Performing Encryption and Sending data to the server\n";
 
 		memset(buffer,0,sizeof(buffer));
-
         valread = read(client_fd, buffer, sizeof(buffer));
-	    // printf("%s\n", buffer);
-
 		string result(buffer);
 
 		if(option=="1")

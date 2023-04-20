@@ -5,12 +5,54 @@
 #include <unistd.h>
 #include <bits/stdc++.h>
 
+// Color codes
+const std::string red("\033[0;31m");
+const std::string green("\033[1;32m");
+const std::string yellow("\033[1;33m");
+const std::string cyan("\033[0;36m");
+const std::string magenta("\033[0;35m");
+const std::string reset("\033[0m");
+// End of color codes
+
 using namespace std;
 
 #define PORT 8080
 
 int main(int argc, char const* argv[])
 {
+
+	 system("clear");
+	cout <<green<<R"(
+SSSSS  EEEEE   AAA   RRRR   CCCCC  H   H    A    BBBBB  L     EEEEE
+S      E      A   A  R  R  C       H   H   A A   B   B  L     E
+SSSSS  EEEEE  AAAAA  R R   C       HHHHH  A   A  BBBBB  L     EEEEE
+    S  E      A   A  R  R  C       H   H  AAAAA  B   B  L     E
+SSSSS  EEEEE  A   A  R   R  CCCCC  H   H  A   A  BBBBB  LLLLL EEEEE
+
+    )"<<reset;
+
+
+
+	cout <<green<<R"(
+EEEE  N    N   CCCC  RRRR  Y   Y  PPPPP  TTTTT  IIII  OOOOO  N    N
+E     N N  N  C      R  R   Y Y   P   P    T     II   O   O  N N  N
+EEEE  N  N N  C      R R     Y    PPPPP    T     II   O   O  N  N N
+E     N   NN  C      R  R    Y    P        T     II   O   O  N   NN
+EEEE  N    N   CCCC  R   R   Y    P        T    IIII  OOOOO  N    N
+
+    )"<<reset;
+
+
+cout<<"\n\n\n\n\n";
+cout<<red<<"##############################################################################\n\n"<<reset;
+cout<<yellow<<"                         WElCOME TO THE SEARCHABLE ENCRYPTION\n";
+cout<<"                             Client Starting...\n\n";
+
+
+
+
+
+
 	int status, valread, client_fd;
 	struct sockaddr_in serv_addr;
 	
@@ -46,25 +88,34 @@ int main(int argc, char const* argv[])
 
         string word="",option="2";
         string number_of_nodes="0",res="";
-		cout<<"###########################################################"<<endl;
+		// cout<<"###########################################################"<<endl;
 
-        printf("==> Enter the word:  ");
+		cout<<cyan<<"==> Enter the word:  "<<reset;
         cin >> word;
+		cout<<cyan;
 	    
 	while(word.length()==0){
-		cout<<"Invalid. Try again.\n";	
-		printf("==> Enter the word:  ");
-        	cin >> word;
+		cout<<red<<"Invalid. Try again.\n";	
+		cout<<cyan<<"==> Enter the word:  "<<reset;
+        cin >> word;
+		cout<<cyan;
+
 	}
 	    
-        printf("==> Press 1 to store or 2 to search :  ");
+        // printf("==> Press 1 to store or 2 to search :  ");
+		cout<<"==> Press 1 to store or 2 to search :  "<<reset;
         cin>>option;
+		cout<<cyan;
+
 
         
         word=option+"_"+word;
 
-		printf("==> Enter the number of nodes you want :  ");
+		// printf("==> Enter the number of nodes you want :  ");
+		cout<<"==> Enter the number of nodes you want :  "<<reset;
 		cin >> number_of_nodes;
+		cout<<cyan;
+
             
 
         word+="_"+number_of_nodes;
@@ -74,7 +125,8 @@ int main(int argc, char const* argv[])
         char* data = const_cast<char*>(word.c_str());
         send(client_fd, data, strlen(data), 0);
 
-        printf("$: Sent info to the server\n");
+        // printf("$: Sent info to the server\n");
+		cout<<green<<"$: Sent info to the server\n";
 
 		memset(buffer,0,sizeof(buffer));
 
@@ -102,14 +154,16 @@ int main(int argc, char const* argv[])
 			}
 			else
 			{
-				cout<<"$: No such word exists in the Database"<<endl;
+				cout<<red<<"$: No such word exists in the Database"<<cyan<<endl;
 			}
 		}
 
-        printf("\n==> Press any key to continue. Press q to quit : ");
+        // printf("\n==> Press any key to continue. Press q to quit : ");
+		cout<<yellow<<"\n==> Press any key to continue. Press q to quit : "<<reset;
         char ch;
         cin >> ch;
-        if( ch == 'q'){
+		cout<<cyan;
+        if( ch == 'q' or ch=='Q'){
             break;
         }
 

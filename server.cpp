@@ -10,6 +10,16 @@
 #include <cstring>
 #include "generator.cpp"
 
+
+// Color codes
+const std::string red("\033[0;31m");
+const std::string green("\033[1;32m");
+const std::string yellow("\033[1;33m");
+const std::string cyan("\033[0;36m");
+const std::string magenta("\033[0;35m");
+const std::string reset("\033[0m");
+// End of color codes
+
 using namespace std;
 
 #define PORT 8080
@@ -19,7 +29,7 @@ int STORE_IN_DB(string encrypted_word)
 	ofstream database_file("hash.txt", ios::app);
 	if (!database_file)
 	{
-		cout << "There was an error opening file for output" << endl;
+		cout <<red<< "There was an error opening file for output" << cyan<<endl;
 		
 		return -1;	
 	}	
@@ -73,15 +83,13 @@ void* run_my_program(void *vargp) {
 	int *processespoint = (int *)vargp;
     int processes = *processespoint;
 
-    std::cout << "Compiling my_program.cpp..." << std::endl;
+    std::cout <<"==> Distributing work to different processes" << endl;
 	int compile_status = system("mpic++ compute.cpp -o compute");
 	if (compile_status != 0) {
-		std::cerr << "Error: Compilation failed." << std::endl;
+		std::cerr <<red<< "Error: Something went wrong " << cyan<<endl;
 		return NULL ;
 	}
-	std::cout << "Compilation successful." << std::endl;
 	
-	std::cout << "Running my_program..." << std::endl;
 	string running_cmd = "mpirun -np " + to_string(processes) + " ./compute";
 	int run_status = system(running_cmd.c_str());
 	return NULL;
@@ -91,6 +99,38 @@ void* run_my_program(void *vargp) {
 
 int main()
 {
+	 system("clear");
+	cout <<green<<R"(
+SSSSS  EEEEE   AAA   RRRR   CCCCC  H   H    A    BBBBB  L     EEEEE
+S      E      A   A  R  R  C       H   H   A A   B   B  L     E
+SSSSS  EEEEE  AAAAA  R R   C       HHHHH  A   A  BBBBB  L     EEEEE
+    S  E      A   A  R  R  C       H   H  AAAAA  B   B  L     E
+SSSSS  EEEEE  A   A  R   R  CCCCC  H   H  A   A  BBBBB  LLLLL EEEEE
+
+    )"<<reset;
+
+
+
+	cout <<green<<R"(
+EEEE  N    N   CCCC  RRRR  Y   Y  PPPPP  TTTTT  IIII  OOOOO  N    N
+E     N N  N  C      R  R   Y Y   P   P    T     II   O   O  N N  N
+EEEE  N  N N  C      R R     Y    PPPPP    T     II   O   O  N  N N
+E     N   NN  C      R  R    Y    P        T     II   O   O  N   NN
+EEEE  N    N   CCCC  R   R   Y    P        T    IIII  OOOOO  N    N
+
+    )"<<reset;
+
+
+cout<<"\n\n\n\n\n";
+cout<<red<<"##############################################################################\n\n"<<reset;
+cout<<yellow<<"                         WElCOME TO THE SEARCHABLE ENCRYPTION\n";
+cout<<"                             Server Starting...\n\n";
+
+
+	
+
+
+
 	int server_fd, client_socket1, client_socket2,  valread;
 	struct sockaddr_in address;
 	int opt = 1;
@@ -123,17 +163,17 @@ int main()
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
-	if (listen(server_fd, 3) < 0) {
+	if (listen(server_fd, 20) < 0) {
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
-	cout<<"Listening..."<<endl;
+	cout<<"Listening..."<<endl<<reset<<cyan;
 
 	if ((client_socket1 = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    std::cout << "Client 1 connected successfully." << std::endl;
+    std::cout << "==> Client connected successfully." << std::endl;
     
     
 
@@ -151,18 +191,18 @@ int main()
         memset(buffer, 0, sizeof(buffer));
 
         if (recv(client_socket1, buffer, sizeof(buffer), 0) <= 0) {
-            std::cout << "Client 1 disconnected." << std::endl;
+            std::cout << "==> Client disconnected." << std::endl;
             break;
         }
-        std::cout << "THe word along with n.of nodes given by the Client 1: " << buffer << std::endl;
+        // std::cout << "The word along with n.of nodes given by the Client 1: " << buffer << std::endl;
 
 		// splitting the word and number of nodes
 
 		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
 
-		cout << "The option is : "  << p.first << endl;
-		cout << "The word is :  "  << p.second.first << endl;
-		cout << "The num is  : " << p.second.second << endl;
+		// cout << "The option is : "  << p.first << endl;
+		// cout << "The word is :  "  << p.second.first << endl;
+		// cout << "The num is  : " << p.second.second << endl;
 		int nop = p.second.second;
 
 
@@ -174,7 +214,7 @@ int main()
 		
 
 
-		std::cout << "Listening for incoming connections..." << std::endl;
+		std::cout << "==> Listening for incoming connections..." << std::endl;
 		sockaddr_in client_addr;
 		socklen_t client_addr_len = sizeof(client_addr);
 		
@@ -188,9 +228,18 @@ int main()
 		
 		// Send a message to the client
 		// function call to sha 512 encryption.
+
 		string encrypted_word =  sha512(p.second.first);
-		char* data = const_cast<char*>(encrypted_word.c_str());
-		send(client_socket2, data, strlen(data), 0);
+
+		char charArray[129];
+        strcpy(charArray, encrypted_word.c_str());
+        // cout<<charArray;
+        
+        send(client_socket2, charArray, sizeof(charArray), 0);
+
+		
+		// char* data = const_cast<char*>(encrypted_word.c_str());
+		// send(client_socket2, data, strlen(data), 0);
 
 		
 		
@@ -200,7 +249,7 @@ int main()
 		if (num_bytes < 0) {
 			std::cerr << "Error: Failed to receive message from Compute." << std::endl;
 		} else {
-			std::cout << "Received message from Compute: " << buffer << std::endl;
+			std::cout << "==> Received message from Compute: " << buffer << std::endl;
 		}
 
 

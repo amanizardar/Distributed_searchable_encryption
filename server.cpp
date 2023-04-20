@@ -19,9 +19,19 @@ const std::string magenta("\033[0;35m");
 const std::string reset("\033[0m");
 // End of color codes
 
+
+long long counter=0;
+
 using namespace std;
 
 #define PORT 8080
+
+struct Args {
+    int arg1;
+    long long arg2;
+};
+
+
 
 int STORE_IN_DB(string encrypted_word)
 {
@@ -78,22 +88,150 @@ pair<string, pair<string,int>> split(string str){
 
 
 
-void* run_my_program(void *vargp) 
-{
-	int *processespoint = (int *)vargp;
-    int processes = *processespoint;
+// void* run_my_program(void *vargp) 
+// {
+// 	int *processespoint = (int *)vargp;
+//     int processes = *processespoint;
 
-    std::cout <<"==> Distributing work to different processes" << endl;
-	int compile_status = system("mpic++ compute.cpp -o compute");
-	if (compile_status != 0) {
-		std::cerr <<red<< "Error: Something went wrong " << cyan<<endl;
-		return NULL ;
-	}
+//     std::cout <<"==> Distributing work to different processes" << endl;
+// 	int compile_status = system("mpic++ compute.cpp -o compute");
+// 	if (compile_status != 0) {
+// 		std::cerr <<red<< "Error: Something went wrong " << cyan<<endl;
+// 		return NULL ;
+// 	}
 	
-	string running_cmd = "mpirun -np " + to_string(processes) + " ./compute";
-	int run_status = system(running_cmd.c_str());
+// 	string running_cmd = "mpirun -np " + to_string(processes) + " ./compute";
+// 	int run_status = system(running_cmd.c_str());
+// 	return NULL;
+// }
+
+void* Handle_This_Client(void* arg) 
+{
+	Args* args = static_cast<Args*>(arg);
+    int client_socket = args->arg1;
+    long long counter = args->arg2;
+
+
+
+
+	// int *client_socket_pointer = (int *)vargp;
+    // int client_socket = *client_socket_pointer;
+
+	// long long *counter_pointer = (long long *)vargp2;
+    // long long  counter = *counter_pointer;
+
+	char buffer[1024] = {0};
+	string random_file_name="file" + to_string(counter);
+
+    while (true) 
+	{
+        // Receive from client.cpp
+
+
+        memset(buffer, 0, sizeof(buffer));
+
+        if (recv(client_socket, buffer, sizeof(buffer), 0) <= 0) {
+            	cout << "==> Client Disconnected." << endl;
+            break;
+        }
+
+		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
+
+		string option = p.first;
+		string encrypted_word =  p.second.first;
+		int no_of_processes = p.second.second;
+
+
+		// Write here function of run_my_program
+		// i.e. Compilation and running and sending random file name and encrypted word.
+
+		cout <<"==> Distributing work to different processes" << endl;
+		int compile_status = system("mpic++ compute.cpp -o compute");
+		if (compile_status != 0) {
+			cerr <<red<< "Error: Something went wrong " << cyan<<endl;
+			return NULL ;
+		}
+		
+		
+		
+		string running_cmd = "mpirun -np " + to_string(no_of_processes) + " ./compute " + encrypted_word + " " + random_file_name ;
+		int run_status = system(running_cmd.c_str());
+
+
+		ifstream that_file; 
+    	that_file.open(random_file_name);
+
+		string res;
+		getline(that_file,res);
+
+		that_file.close();
+		
+
+
+		if(option=="1")
+		{
+			if(res=="NO")   //means Word is not present in DB, So we need to store it.
+			{
+				int res_of_storing = STORE_IN_DB(encrypted_word);
+
+				if(res_of_storing==-1) 
+				{
+					string temp = "The Updation in the DB is not possible due to an error";
+					char tempbuff[1024];
+					strcpy(tempbuff,temp.c_str());
+					send(client_socket, tempbuff, sizeof(tempbuff), 0);
+				}
+				else
+				{
+					string temp = "The new word has been successfully added into the database";
+					char tempbuff[1024];
+					strcpy(tempbuff,temp.c_str());
+					send(client_socket, tempbuff, sizeof(tempbuff), 0);
+				}
+			}
+			else if(res=="YES")  //Means Word is already there in the DB. (Means Sending Yes to the Client)
+			{
+				char tempbuff[1024];
+				strcpy(tempbuff,res.c_str());
+				send(client_socket, tempbuff, sizeof(tempbuff), 0);
+			}
+			else
+			{
+				string temp = "Error: Something went Wrong. Unable to Store."; //that means compute was not able to write YES/NO in the file. 
+				char tempbuff[1024];
+				strcpy(tempbuff,temp.c_str());
+				send(client_socket, tempbuff, sizeof(tempbuff), 0);
+			}
+		}
+		else  //Option 2 (Searching). Searching result will be sent to the client.
+		{
+			if(res=="NO" or res=="YES")   //means Word is not present in DB, So we need to store it.
+			{
+				char tempbuff[1024];
+				strcpy(tempbuff,res.c_str());
+				send(client_socket, tempbuff, sizeof(tempbuff), 0);
+			}
+			else
+			{
+				string temp = "Error: Something went Wrong in Searching"; //that means compute was not able to write YES/NO in the file. 
+				char tempbuff[1024];
+				strcpy(tempbuff,temp.c_str());
+				send(client_socket, tempbuff, sizeof(tempbuff), 0);
+			}
+		}
+	
+    }
+
+	string cmd_to_delete_the_file = "rm " + random_file_name;
+	system(cmd_to_delete_the_file.c_str());
+    
+    // Close sockets
+    close(client_socket);
+
+    
 	return NULL;
 }
+
 
 
 
@@ -169,114 +307,136 @@ cout<<"                             Server Starting...\n\n";
 	}
 	cout<<"Listening..."<<endl<<reset<<cyan;
 
-	if ((client_socket1 = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
-    std::cout << "==> Client connected successfully." << std::endl;
-    
-    
 
 
-
-	char buffer[1024] = {0};
-
-	
-
-
-    while (true) 
+	while(1)
 	{
-        // Receive from client.cpp
-
-
-        memset(buffer, 0, sizeof(buffer));
-
-        if (recv(client_socket1, buffer, sizeof(buffer), 0) <= 0) {
-            	cout << "==> Unable to recieve data from the Client." << endl;
-            break;
-        }
-
-		pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
-
-		string option = p.first;
-		string encrypted_word =  p.second.first;
-		int no_of_processes = p.second.second;
-
-		pthread_t t1;
-		pthread_create(&t1, NULL, run_my_program, &no_of_processes);
-		
-
-
-		std::cout << "==> Listening for incoming connections..." << std::endl;
-		sockaddr_in client_addr;
-		socklen_t client_addr_len = sizeof(client_addr);
-		
-			// Accept incoming connections
-		int client_socket2 = accept(server_fd, (sockaddr*)&client_addr, &client_addr_len);
-		if (client_socket2 < 0) {
-			std::cerr << "Error: Failed to accept incoming connection." << std::endl;
-			continue;
-		}
-
-
-		char charArray[129];
-        strcpy(charArray, encrypted_word.c_str());  
-        send(client_socket2, charArray, sizeof(charArray), 0);
-
-		
-		// Receive a message from the Compute
-		char buffer[1024] = {0};
-		int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);  // Buffer will get Either Yes or NO.
-		if (num_bytes < 0) {
-			cerr << "Error: Failed to receive message from Compute." << endl;
-		} else {
-			cout << "==> Received message from Compute: " << buffer << endl;
-		}
-
-
-
-		pthread_join(t1, NULL);
-
-		
-		// Close the client socket
-		close(client_socket2);
-
-		if(option=="1")
+		if ((client_socket1 = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) 
 		{
-			string res(buffer);
-			if(res=="NO")   //means Word is not present in DB, So we need to store it.
-			{
-				int res_of_storing = STORE_IN_DB(encrypted_word);
+			perror("accept");
+			exit(EXIT_FAILURE);
+    	}
+    	cout << "==> New Client Connected Successfully." << endl;
 
-				if(res_of_storing==-1) 
-				{
-					string temp = "The Updation in the DB is not possible due to an error";
-					char tempbuff[1024];
-					strcpy(tempbuff,temp.c_str());
-					send(client_socket1, tempbuff, sizeof(tempbuff), 0);
-				}
-				else
-				{
-					string temp = "The Word has been added into the Database";
-					char tempbuff[1024];
-					strcpy(tempbuff,temp.c_str());
-					send(client_socket1, tempbuff, sizeof(tempbuff), 0);
-				}
-			}
-			else  //Means Word is already there in the DB. (Means Sending Yes to the Client)
-			{
-				send(client_socket1, buffer, sizeof(buffer), 0);
-			}
-		}
+		long long counter_local = counter;
+		Args my_args;
+		my_args.arg1=client_socket1;
+		my_args.arg2=counter_local;
+		
+		pthread_t client_thread;
+		pthread_create(&client_thread, NULL, Handle_This_Client, &my_args);
+
+		counter++;
+	}
+
+	// if ((client_socket1 = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+    //     perror("accept");
+    //     exit(EXIT_FAILURE);
+    // }
+    // std::cout << "==> Client connected successfully." << std::endl;
+    
+    
+
+
+
+	// char buffer[1024] = {0};
+
+	
+
+
+    // while (true) 
+	// {
+    //     // Receive from client.cpp
+
+
+    //     memset(buffer, 0, sizeof(buffer));
+
+    //     if (recv(client_socket1, buffer, sizeof(buffer), 0) <= 0) {
+    //         	cout << "==> Unable to recieve data from the Client." << endl;
+    //         break;
+    //     }
+
+	// 	pair<string, pair<string,int>> p = split(buffer); //option,word,num_nodes
+
+	// 	string option = p.first;
+	// 	string encrypted_word =  p.second.first;
+	// 	int no_of_processes = p.second.second;
+
+	// 	pthread_t t1;
+	// 	pthread_create(&t1, NULL, run_my_program, &no_of_processes);
+		
+
+
+	// 	std::cout << "==> Listening for incoming connections..." << std::endl;
+	// 	sockaddr_in client_addr;
+	// 	socklen_t client_addr_len = sizeof(client_addr);
+		
+	// 		// Accept incoming connections
+	// 	int client_socket2 = accept(server_fd, (sockaddr*)&client_addr, &client_addr_len);
+	// 	if (client_socket2 < 0) {
+	// 		std::cerr << "Error: Failed to accept incoming connection." << std::endl;
+	// 		continue;
+	// 	}
+
+
+	// 	char charArray[129];
+    //     strcpy(charArray, encrypted_word.c_str());  
+    //     send(client_socket2, charArray, sizeof(charArray), 0);
+
+		
+	// 	// Receive a message from the Compute
+	// 	char buffer[1024] = {0};
+	// 	int num_bytes = recv(client_socket2, buffer, sizeof(buffer), 0);  // Buffer will get Either Yes or NO.
+	// 	if (num_bytes < 0) {
+	// 		cerr << "Error: Failed to receive message from Compute." << endl;
+	// 	} else {
+	// 		cout << "==> Received message from Compute: " << buffer << endl;
+	// 	}
+
+
+
+	// 	pthread_join(t1, NULL);
+
+		
+	// 	// Close the client socket
+	// 	close(client_socket2);
+
+	// 	if(option=="1")
+	// 	{
+	// 		string res(buffer);
+	// 		if(res=="NO")   //means Word is not present in DB, So we need to store it.
+	// 		{
+	// 			int res_of_storing = STORE_IN_DB(encrypted_word);
+
+	// 			if(res_of_storing==-1) 
+	// 			{
+	// 				string temp = "The Updation in the DB is not possible due to an error";
+	// 				char tempbuff[1024];
+	// 				strcpy(tempbuff,temp.c_str());
+	// 				send(client_socket1, tempbuff, sizeof(tempbuff), 0);
+	// 			}
+	// 			else
+	// 			{
+	// 				string temp = "The Word has been added into the Database";
+	// 				char tempbuff[1024];
+	// 				strcpy(tempbuff,temp.c_str());
+	// 				send(client_socket1, tempbuff, sizeof(tempbuff), 0);
+	// 			}
+	// 		}
+	// 		else  //Means Word is already there in the DB. (Means Sending Yes to the Client)
+	// 		{
+	// 			send(client_socket1, buffer, sizeof(buffer), 0);
+	// 		}
+	// 	}
 		
 	
-		if(option=="2")  // Searching result will be sent to the client.
-        send(client_socket1, buffer, sizeof(buffer), 0);
+	// 	if(option=="2")  // Searching result will be sent to the client.
+    //     send(client_socket1, buffer, sizeof(buffer), 0);
 	
-    }
+    // }
     
     // Close sockets
-    close(client_socket1);
+    // close(client_socket1);
     
     close(server_fd);
 

@@ -35,59 +35,7 @@ int main(int argc,char** argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &total_process);
-
-    // char charArray[129];
-    // int c_socket = 0;
-
-
-    // if(my_rank==0)
-    // {
-    //     string tracker_port ="8080";
-    //     string tracker_ip ="127.0.0.1";
-
-    //     if ((c_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    //     {
-    //         cout <<"Error while creating client socket\n";
-    //     }
-        
-    //     struct sockaddr_in server_address;
-    //     server_address.sin_family = AF_INET;
-    //     // server_address.sin_addr.s_addr=INADDR_ANY;
-    //     server_address.sin_port = htons(stoi(tracker_port));
-
-    //     if (inet_pton(AF_INET, tracker_ip.c_str(), &server_address.sin_addr) <= 0)
-    //     {
-    //         printf("\nInvalid address/ Address not supported \n");
-    //         exit(EXIT_FAILURE);
-    //     }
-
-    //     int connection_status = connect(c_socket, (struct sockaddr *)&server_address, sizeof(server_address));
-    //     if (connection_status == -1)
-    //     {
-    //         cout << "Error in connection from client side.\n";
-    //         exit(EXIT_FAILURE);
-    //     }
-    //     // else
-    //     // {
-    //     //     cout <<"Congratulations!! Connection Established with the Tracker." << endl;
-    //     //     cout<<"Tracker ip is "<<tracker_ip<<" and Port is "<<tracker_port<<".\n";
-    //     // }
-
-        
-    //     recv(c_socket, charArray, sizeof(charArray), 0);
-
-        
-        
-    // }
-
-
-    // MPI_Bcast(&charArray,129,MPI_CHAR,0,MPI_COMM_WORLD);
-
-    // string s(charArray);
-    // search_string=s;
-
-    // if(my_rank==1)
-    // cout<<search_string;   
+   
 
     ifstream database_file; 
     database_file.open("hash.txt");
@@ -111,12 +59,6 @@ int main(int argc,char** argv) {
     }
 
     MPI_Bcast(&total_lines_in_db,1,MPI_INT,0,MPI_COMM_WORLD);
-
-
-
-    // if(my_rank==1)
-    // cout<<"hi"<<total_lines_in_db;
-
 
 
 
@@ -155,19 +97,19 @@ int main(int argc,char** argv) {
 
 
 
-// Fast way is i know number of bytes in each line  
-    // // 
-    //  int lineLength = 128; 
-    // streampos position = (starting_line - 1) * lineLength;
+// // Fast way is i know number of bytes in each line  
+//     // 
+//      int lineLength = 129; 
+//     streampos position = (starting_line) * lineLength;
 
     
-    // database_file.seekg(position);
+//     database_file.seekg(position);
 
-    // std::string line;
-    // int currentLine = starting_line;
+//     std::string line;
+//     int currentLine = starting_line;
 
-    // // 
-// 
+//     // 
+
 
 
 
@@ -184,15 +126,24 @@ int main(int argc,char** argv) {
         currentLine++;
     }
 
-
     // IF fast way remove above lines
+
+
     if(my_rank==0)
         cout<<"search_ string is ="<<search_string<<endl<<"curr_line = "<<currentLine<<endl;
 
+            if(my_rank==0)
+            {
+                database_file.clear();
+                database_file.seekg(0,ios::beg);
+                cout<<database_file.tellg();
+            }
+    
+
     while (getline(database_file, line) && currentLine <= starting_line + rowsperprocess[my_rank] - 1) 
     {
-        if(my_rank==0)
-        cout<<"line is ="<<line<<endl;
+        // if(my_rank==0)
+        // cout<<"line is ="<<line<<endl;
 
 
 
@@ -262,25 +213,6 @@ int main(int argc,char** argv) {
 
         output_file.close();
 
-
-
-
-            
-        
-
-        // SEND found_or_not to server
-        // if(found_or_not==1)
-        // {
-        //     char buf[1024] = "YES";
-        //     send(c_socket, buf, sizeof(buf), 0);
-        // }
-        // else
-        // {
-        //     char buf[1024] = "NO";
-        //     send(c_socket, buf, sizeof(buf), 0);
-        // }
-
-        // close(c_socket);
 
     }
 

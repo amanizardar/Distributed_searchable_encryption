@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <bits/stdc++.h>
 #include "generator.cpp"
-
+#include <chrono>
 // Color codes
 const std::string red("\033[0;31m");
 const std::string green("\033[1;32m");
@@ -126,11 +126,20 @@ cout<<"                             Client Starting...\n\n";
 
         char* data = const_cast<char*>(data_to_send.c_str());
         send(client_fd, data, strlen(data), 0);
+		
+    	// auto begin = chrono::high_resolution_clock::now();  // Start time // Time
 
 		cout<<green<<"$: Performing Encryption and Sending data to the server\n";
 
 		memset(buffer,0,sizeof(buffer));
         valread = read(client_fd, buffer, sizeof(buffer));
+
+		// auto end = chrono::high_resolution_clock::now(); //Stop measuring time
+		// auto elapsed = chrono::duration_cast<std::chrono::nanoseconds>(end - begin);  // Time
+
+		// cout<<"Time elapsed: "<<elapsed.count()* 1e-9<<endl; // Time
+
+
 		string result(buffer);
 
 		if(option=="1")
